@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Erro de treinamento</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: sans-serif; max-width: 900px; margin: 2em auto; }
@@ -10,25 +9,31 @@
   </style>
 </head>
 <body>
-  <h2>Erro por época</h2>
+  <h2 id = "subtitle"></h2>
   <canvas id="grafico"></canvas>
-
   <script>
-    fetch('/data').then(r => r.json()).then(({ erroTre, erroVal }) => {
-      const epocas = erroTre.map((_, i) => i + 1);
+    fetch('/data').then(r => r.json()).then(({titulo, subtitulo, tipo, ylabel, xlabel, x, dados, cores, nomes}) => {
+      const qt_curvas = nomes.length;
+      let dataset = Array(qt_curvas);
+
+      for(let ii = 0; ii < qt_curvas; ii++)
+      {
+        dataset[ii] = { label: nomes[ii], data: dados[ii], borderColor: cores[ii],  tension: 0.1 };
+      }
+
+      document.title = titulo;
+      document.getElementById('subtitle').textContent = subtitulo;
+
       new Chart(document.getElementById('grafico'), {
         type: 'line',
         data: {
-          labels: epocas,
-          datasets: [
-            { label: 'Treino',    data: erroTre, borderColor: 'blue',  tension: 0.1 },
-            { label: 'Validação', data: erroVal, borderColor: 'red',   tension: 0.1 },
-          ],
+          labels: x,
+          datasets: dataset,
         },
         options: {
           scales: {
-            y: { type: 'logarithmic', title: { display: true, text: 'Erro (MSE)' } },
-            x: { title: { display: true, text: 'Época' } },
+            y: { type: tipo, title: { display: true, text: ylabel } },
+            x: { title: { display: true, text: xlabel } },
           },
         },
       });
